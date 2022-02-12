@@ -1,0 +1,20 @@
+{
+    "name": "tecdynamics/menu",
+    "description": "Menu package",
+    "type": "package",
+    "autoload": {
+        "psr-4": {
+            "Tec\\Menu\\": "src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Tec\\Menu\\Providers\\MenuServiceProvider"
+            ],
+            "aliases": {
+                "Menu": "Tec\\Menu\\Facades\\MenuFacade"
+            }
+        }
+    }
+}
