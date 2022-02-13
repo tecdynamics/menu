@@ -7,6 +7,10 @@
             "Tec\\Menu\\": "src"
         }
     },
+     "require": {
+        "tecdynamics/platform": "*@dev",
+        "tecdynamics/theme": "*@dev"
+    },
     "extra": {
         "laravel": {
             "providers": [
