@@ -1,3 +1,4 @@
+
 @if (!empty($options))
     @php $id = Str::slug($name) . '-'. time(); @endphp
     <div class="widget meta-boxes">

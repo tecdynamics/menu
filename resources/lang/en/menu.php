@@ -21,4 +21,6 @@ return [
     'edit'             => 'Edit menu',
     'menu_settings'    => 'Menu settings',
     'display_location' => 'Display location',
+    'image'=>'Menu Image',
+    'template'=>'Menu Template'
 ];

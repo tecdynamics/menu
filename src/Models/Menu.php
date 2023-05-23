@@ -6,6 +6,7 @@ use Tec\Base\Enums\BaseStatusEnum;
 use Tec\Base\Models\BaseModel;
 use Tec\Base\Traits\EnumCastable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Tec\Menu\Enums\MenuTemplateEnum;
 
 class Menu extends BaseModel
 {
@@ -26,6 +27,8 @@ class Menu extends BaseModel
         'name',
         'slug',
         'status',
+        'image',
+        'template'
     ];
 
     /**
@@ -33,6 +36,7 @@ class Menu extends BaseModel
      */
     protected $casts = [
         'status' => BaseStatusEnum::class,
+        'template' => MenuTemplateEnum::class,
     ];
 
     protected static function boot()

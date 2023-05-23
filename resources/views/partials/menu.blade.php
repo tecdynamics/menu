@@ -1,4 +1,6 @@
+
 <ol class="dd-list">
+
     @foreach ($menu_nodes as $key => $row)
         <li class="dd-item dd3-item @if ($row->reference_id > 0) post-item @endif" data-reference-type="{{ $row->reference_type }}"
             data-reference-id="{{ $row->reference_id }}" data-title="{{ $row->title }}"

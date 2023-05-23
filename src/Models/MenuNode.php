@@ -30,7 +30,9 @@ class MenuNode extends BaseModel
         'title',
         'css_class',
         'target',
+        'position',
         'has_child',
+        'icon',
     ];
 
     /**

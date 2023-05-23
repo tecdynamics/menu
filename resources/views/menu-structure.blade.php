@@ -1,3 +1,4 @@
+
 @if (!empty($menu) && $menu->id)
     <input type="hidden" name="deleted_nodes">
     <textarea name="menu_nodes" id="nestable-output" class="form-control hidden"></textarea>

@@ -15,3 +15,6 @@ if (!defined('MENU_ACTION_SIDEBAR_OPTIONS')) {
 if (!defined('MENU_FILTER_NODE_URL')) {
     define('MENU_FILTER_NODE_URL', 'menu_node_url');
 }
+if (!defined('MENU_TEMPLATE_FILTER')) {
+    define('MENU_TEMPLATE_FILTER', 'menu_template_filter');
+}

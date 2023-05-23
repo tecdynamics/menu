@@ -221,8 +221,12 @@ class Menu
                 continue;
             }
 
+            if (!class_exists($menu->reference_type)) {
+                continue;
+            }
+
             $attributes['slug'] = $menu->slug;
-            $html .= $this->generateMenu($attributes);
+            $html .=   $this->generateMenu($attributes);
         }
 
         return $html;
@@ -257,19 +261,18 @@ class Menu
     public function generateMenu(array $args = [])
     {
         $this->load();
+        $args=apply_filters(MENU_TEMPLATE_FILTER, $args);
 
         $view = Arr::get($args, 'view');
         $theme = Arr::get($args, 'theme', true);
 
         $menu = Arr::get($args, 'menu');
-
         $slug = Arr::get($args, 'slug');
         if (!$menu && !$slug) {
             return null;
         }
 
         $parentId = Arr::get($args, 'parent_id', 0);
-
         if (!$menu) {
             $menu = $this->data->where('slug', $slug)->first();
         }
@@ -291,7 +294,9 @@ class Menu
         $data = [
             'menu'       => $menu,
             'menu_nodes' => $menuNodes,
+            'rowdata'=>Arr::get($args, 'rowdata',[])
         ];
+
 
         $data['options'] = $this->html->attributes(Arr::get($args, 'options', []));
 

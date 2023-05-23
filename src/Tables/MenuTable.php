@@ -3,6 +3,7 @@
 namespace Tec\Menu\Tables;
 
 use BaseHelper;
+use RvMedia;
 use Tec\Base\Enums\BaseStatusEnum;
 use Tec\Menu\Repositories\Interfaces\MenuInterface;
 use Tec\Table\Abstracts\TableAbstract;
@@ -49,6 +50,10 @@ class MenuTable extends TableAbstract
     {
         $data = $this->table
             ->eloquent($this->query())
+            ->editColumn('image', function ($item) {
+                return Html::image(RvMedia::getImageUrl($item->image, 'thumb', false, RvMedia::getDefaultImage()),
+                    $item->name, ['width' => 50]);
+            })
             ->editColumn('name', function ($item) {
                 if (!Auth::user()->hasPermission('menus.edit')) {
                     return $item->name;
@@ -61,6 +66,9 @@ class MenuTable extends TableAbstract
             })
             ->editColumn('created_at', function ($item) {
                 return BaseHelper::formatDate($item->created_at);
+            })
+            ->editColumn('template', function ($item) {
+                return ucfirst($item->template);
             })
             ->editColumn('status', function ($item) {
                 return $item->status->toHtml();
@@ -80,7 +88,9 @@ class MenuTable extends TableAbstract
         $query = $this->repository->getModel()
             ->select([
                 'id',
+                'image',
                 'name',
+                'template',
                 'created_at',
                 'status',
             ]);
@@ -98,9 +108,18 @@ class MenuTable extends TableAbstract
                 'title' => trans('core/base::tables.id'),
                 'width' => '20px',
             ],
+            'image'      => [
+                'name'  => 'image',
+                'title' => trans('core/base::tables.image'),
+                'width' => '70px',
+            ],
             'name'       => [
                 'title' => trans('core/base::tables.name'),
                 'class' => 'text-start',
+            ],
+            'template' => [
+                'title' => trans('packages/menu::menu.template'),
+                'width' => '100px',
             ],
             'created_at' => [
                 'title' => trans('core/base::tables.created_at'),
