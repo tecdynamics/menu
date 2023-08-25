@@ -3,6 +3,7 @@
 namespace Tec\Menu;
 
 use Tec\Base\Enums\BaseStatusEnum;
+use Tec\Menu\Enums\MenuTemplateEnum;
 use Tec\Menu\Repositories\Eloquent\MenuRepository;
 use Tec\Menu\Repositories\Interfaces\MenuInterface;
 use Tec\Menu\Repositories\Interfaces\MenuNodeInterface;
@@ -299,11 +300,12 @@ class Menu
 
         $data['options'] = $this->html->attributes(Arr::get($args, 'options', []));
 
-        if ($theme && $view) {
+
+        if ($theme && !empty($view)  ) {
+            if($view=='default') $view=MenuTemplateEnum::DEFAULT;
             return Theme::partial($view, $data);
         }
-
-        if ($view) {
+        if (!empty($view)&& !is_null($view)) {
             return view($view, $data)->render();
         }
 
