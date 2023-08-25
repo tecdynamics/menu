@@ -26,6 +26,10 @@
                     </label>
                 @endif
                 <label class="pb-3">
+                    <span class="text" data-update="icon">Menu Image</span>
+                    <input type="text" name="icon" value="{{ $row->icon }}" data-old="{{ $row->icon }}">
+                </label>
+                <label class="pb-3">
                     <span class="text" data-update="icon-font">{{ trans('packages/menu::menu.icon') }}</span>
                     <input type="text" name="icon-font" value="{{ $row->icon_font }}" data-old="{{ $row->icon_font }}">
                 </label>

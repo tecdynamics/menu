@@ -1,11 +1,14 @@
 {
     "name": "tecdynamics/menu",
-    "description": "Menu package",
+    "description": "Tec Menu package",
     "type": "package",
     "autoload": {
         "psr-4": {
             "Tec\\Menu\\": "src"
         }
+    },
+    "require": {
+        "php": ">=7.2"
     },
     "extra": {
         "laravel": {

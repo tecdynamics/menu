@@ -24,7 +24,7 @@ use Tec\Base\Supports\Enum;
  * @method static MenuTemplateEnum WITH_ALL_IMAGES()
  */
 class MenuTemplateEnum extends Enum {
-    const DEFAULT = 'default';
+    const DEFAULT = 'main-menu';
     const WITH_MAIN_IMAGE_ONLY = 'main_image_only';
     const WITH_ALL_IMAGES = 'all_images';
 

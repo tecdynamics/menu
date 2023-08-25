@@ -88,7 +88,8 @@ class MenuNestable {
                 let data_title = sanitizeHTML($('#node-title').val());
                 let data_url = sanitizeHTML($('#node-url').val());
                 let data_css_class = sanitizeHTML($('#node-css').val());
-                let data_font_icon = sanitizeHTML($('#node-icon').val());
+                let data_icon = sanitizeHTML($('#node-icon').val());
+                let data_font_icon = sanitizeHTML($('#node-font_icon').val());
                 let data_target = sanitizeHTML($('#target').find('option:selected').val());
                 let url_html = '<label class="pb-3"><span class="text" data-update="custom-url">Url</span><input type="text" data-old="' + data_url + '" value="' + data_url + '" name="custom-url"></label>';
                 html += '<li data-reference-type="' + data_type + '" data-reference-id="' + data_reference_id + '" data-title="' + data_title + '" data-class="' + data_css_class + '" data-id="0" data-custom-url="' + data_url + '" data-icon-font="' + data_font_icon + '" data-target="' + data_target + '" class="dd-item dd3-item">';
@@ -105,6 +106,8 @@ class MenuNestable {
                 html += '<input type="text" data-old="' + data_title + '" value="' + data_title + '" name="title" class="form-control">';
                 html += '</label>';
                 html += url_html;
+                html += '<label class="pb-3"><span class="text" data-update="icon-font">Menu Imaget</span><input type="text" name="icon" value="' + data_icon + '" data-old="' + data_icon + '" class="form-control"></label>';
+                html += '<label class="pb-3">';
                 html += '<label class="pb-3"><span class="text" data-update="icon-font">Icon - font</span><input type="text" name="icon-font" value="' + data_font_icon + '" data-old="' + data_font_icon + '" class="form-control"></label>';
                 html += '<label class="pb-3">';
                 html += '<span class="text" data-update="class">CSS class</span>';

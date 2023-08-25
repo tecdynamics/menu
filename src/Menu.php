@@ -261,7 +261,6 @@ class Menu
     public function generateMenu(array $args = [])
     {
         $this->load();
-        $args=apply_filters(MENU_TEMPLATE_FILTER, $args);
 
         $view = Arr::get($args, 'view');
         $theme = Arr::get($args, 'theme', true);
