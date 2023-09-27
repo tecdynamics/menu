@@ -3,7 +3,6 @@
 namespace Tec\Menu;
 
 use Tec\Base\Enums\BaseStatusEnum;
-use Tec\Menu\Enums\MenuTemplateEnum;
 use Tec\Menu\Repositories\Eloquent\MenuRepository;
 use Tec\Menu\Repositories\Interfaces\MenuInterface;
 use Tec\Menu\Repositories\Interfaces\MenuNodeInterface;
@@ -17,6 +16,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Theme;
 use Throwable;
+use Tec\Menu\Enums\MenuTemplateEnum;
+
 
 class Menu
 {
@@ -297,18 +298,17 @@ class Menu
             'rowdata'=>Arr::get($args, 'rowdata',[])
         ];
 
-
         $data['options'] = $this->html->attributes(Arr::get($args, 'options', []));
 
-
         if ($theme && !empty($view)  ) {
-            if($view=='default') $view=MenuTemplateEnum::DEFAULT;
-            return Theme::partial($view, $data);
+            if($view=='default'){
+                $view=MenuTemplateEnum::DEFAULT;
+            }
+           return Theme::partial($view, $data);
         }
         if (!empty($view)&& !is_null($view)) {
             return view($view, $data)->render();
         }
-
         return view('packages/menu::partials.default', $data)->render();
     }
 

@@ -51,15 +51,15 @@ class MenuTable extends TableAbstract
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('image', function ($item) {
-                return Html::image(RvMedia::getImageUrl($item->image, 'thumb', false, RvMedia::getDefaultImage()),
-                    $item->name, ['width' => 50]);
+                return Html()->img(RvMedia::getImageUrl($item->image, 'thumb', false, RvMedia::getDefaultImage()))
+                    ->attributes(['alt'=> $item->name, 'width' => 50])->toHtml();
             })
             ->editColumn('name', function ($item) {
                 if (!Auth::user()->hasPermission('menus.edit')) {
                     return $item->name;
                 }
 
-                return Html::link(route('menus.edit', $item->id), $item->name);
+                return Html::a(route('menus.edit', $item->id), $item->name);
             })
             ->editColumn('checkbox', function ($item) {
                 return $this->getCheckbox($item->id);
