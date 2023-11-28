@@ -24,7 +24,7 @@ use Tec\Base\Supports\Enum;
  * @method static MenuTemplateEnum WITH_ALL_IMAGES()
  */
 class MenuTemplateEnum extends Enum {
-    const DEFAULT = 'main-menu';
+    const DEFAULT = 'default';
     const WITH_MAIN_IMAGE_ONLY = 'main_image_only';
     const WITH_ALL_IMAGES = 'all_images';
 
@@ -34,13 +34,13 @@ class MenuTemplateEnum extends Enum {
     public function toHtml() {
         switch ($this->value) {
             case self::DEFAULT:
-                return Html::element('span', 'Default', ['class' => 'label-info status-label'])
+                return Html::tag('span', 'Default', ['class' => 'label-info status-label'])
                     ->toHtml();
             case self::WITH_MAIN_IMAGE_ONLY:
-                return Html::element('span', 'Only the Main Image', ['class' => 'label-warning status-label'])
+                return Html::tag('span', 'Only the Main Image', ['class' => 'label-warning status-label'])
                     ->toHtml();
             case self::WITH_ALL_IMAGES:
-                return Html::element('span', 'Include All Image', ['class' => 'label-success status-label'])
+                return Html::tag('span', 'Include All Image', ['class' => 'label-success status-label'])
                     ->toHtml();
             default:
                 return parent::toHtml();

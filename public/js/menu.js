@@ -2837,11 +2837,6 @@ class Container extends Node {
     return this.nodes.every(condition)
   }
 
-  get first() {
-    if (!this.proxyOf.nodes) return undefined
-    return this.proxyOf.nodes[0]
-  }
-
   getIterator() {
     if (!this.lastEach) this.lastEach = 0
     if (!this.indexes) this.indexes = {}
@@ -2946,11 +2941,6 @@ class Container extends Node {
     this.markDirty()
 
     return this
-  }
-
-  get last() {
-    if (!this.proxyOf.nodes) return undefined
-    return this.proxyOf.nodes[this.proxyOf.nodes.length - 1]
   }
 
   normalize(nodes, sample) {
@@ -3165,6 +3155,16 @@ class Container extends Node {
         return callback(child, i)
       }
     })
+  }
+
+  get first() {
+    if (!this.proxyOf.nodes) return undefined
+    return this.proxyOf.nodes[0]
+  }
+
+  get last() {
+    if (!this.proxyOf.nodes) return undefined
+    return this.proxyOf.nodes[this.proxyOf.nodes.length - 1]
   }
 }
 
@@ -3602,10 +3602,6 @@ class Input {
     return result
   }
 
-  get from() {
-    return this.file || this.id
-  }
-
   fromOffset(offset) {
     let lastLine, lineToIndex
     if (!this[fromOffsetCache]) {
@@ -3715,6 +3711,10 @@ class Input {
       }
     }
     return json
+  }
+
+  get from() {
+    return this.file || this.id
   }
 }
 
@@ -3903,14 +3903,6 @@ class LazyResult {
     return this.async().catch(onRejected)
   }
 
-  get content() {
-    return this.stringify().content
-  }
-
-  get css() {
-    return this.stringify().css
-  }
-
   finally(onFinally) {
     return this.async().then(onFinally, onFinally)
   }
@@ -3958,18 +3950,6 @@ class LazyResult {
     return error
   }
 
-  get map() {
-    return this.stringify().map
-  }
-
-  get messages() {
-    return this.sync().messages
-  }
-
-  get opts() {
-    return this.result.opts
-  }
-
   prepareVisitors() {
     this.listeners = {}
     let add = (plugin, type, cb) => {
@@ -4006,14 +3986,6 @@ class LazyResult {
       }
     }
     this.hasListener = Object.keys(this.listeners).length > 0
-  }
-
-  get processor() {
-    return this.result.processor
-  }
-
-  get root() {
-    return this.sync().root
   }
 
   async runAsync() {
@@ -4117,10 +4089,6 @@ class LazyResult {
     this.result.map = data[1]
 
     return this.result
-  }
-
-  get [Symbol.toStringTag]() {
-    return 'LazyResult'
   }
 
   sync() {
@@ -4274,6 +4242,38 @@ class LazyResult {
   warnings() {
     return this.sync().warnings()
   }
+
+  get content() {
+    return this.stringify().content
+  }
+
+  get css() {
+    return this.stringify().css
+  }
+
+  get map() {
+    return this.stringify().map
+  }
+
+  get messages() {
+    return this.sync().messages
+  }
+
+  get opts() {
+    return this.result.opts
+  }
+
+  get processor() {
+    return this.result.processor
+  }
+
+  get root() {
+    return this.sync().root
+  }
+
+  get [Symbol.toStringTag]() {
+    return 'LazyResult'
+  }
 }
 
 LazyResult.registerPostcss = dependant => {
@@ -4385,6 +4385,10 @@ class MapGenerator {
     this.opts = opts
     this.css = cssString
     this.usesFileUrls = !this.mapOpts.from && this.mapOpts.absolute
+
+    this.memoizedFileURLs = new Map()
+    this.memoizedPaths = new Map()
+    this.memoizedURLs = new Map()
   }
 
   addAnnotation() {
@@ -4609,9 +4613,11 @@ class MapGenerator {
   }
 
   path(file) {
-    if (file.indexOf('<') === 0) return file
-    if (/^\w+:\/\//.test(file)) return file
     if (this.mapOpts.absolute) return file
+    if (file.charCodeAt(0) === 60 /* `<` */) return file
+    if (/^\w+:\/\//.test(file)) return file
+    let cached = this.memoizedPaths.get(file)
+    if (cached) return cached
 
     let from = this.opts.to ? dirname(this.opts.to) : '.'
 
@@ -4619,8 +4625,10 @@ class MapGenerator {
       from = dirname(resolve(from, this.mapOpts.annotation))
     }
 
-    file = relative(from, file)
-    return file
+    let path = relative(from, file)
+    this.memoizedPaths.set(file, path)
+
+    return path
   }
 
   previous() {
@@ -4686,8 +4694,14 @@ class MapGenerator {
   }
 
   toFileUrl(path) {
+    let cached = this.memoizedFileURLs.get(path)
+    if (cached) return cached
+
     if (pathToFileURL) {
-      return pathToFileURL(path).toString()
+      let fileURL = pathToFileURL(path).toString()
+      this.memoizedFileURLs.set(path, fileURL)
+
+      return fileURL
     } else {
       throw new Error(
         '`map.absolute` option is not available in this PostCSS build'
@@ -4696,10 +4710,17 @@ class MapGenerator {
   }
 
   toUrl(path) {
+    let cached = this.memoizedURLs.get(path)
+    if (cached) return cached
+
     if (sep === '\\') {
       path = path.replace(/\\/g, '/')
     }
-    return encodeURI(path).replace(/[#?]/g, encodeURIComponent)
+
+    let url = encodeURI(path).replace(/[#?]/g, encodeURIComponent)
+    this.memoizedURLs.set(path, url)
+
+    return url
   }
 }
 
@@ -4766,16 +4787,43 @@ class NoWorkResult {
     return this.async().catch(onRejected)
   }
 
+  finally(onFinally) {
+    return this.async().then(onFinally, onFinally)
+  }
+
+  sync() {
+    if (this.error) throw this.error
+    return this.result
+  }
+
+  then(onFulfilled, onRejected) {
+    if (true) {
+      if (!('from' in this._opts)) {
+        warnOnce(
+          'Without `from` option PostCSS could generate wrong source map ' +
+            'and will not find Browserslist config. Set it to CSS file path ' +
+            'or to `undefined` to prevent this warning.'
+        )
+      }
+    }
+
+    return this.async().then(onFulfilled, onRejected)
+  }
+
+  toString() {
+    return this._css
+  }
+
+  warnings() {
+    return []
+  }
+
   get content() {
     return this.result.css
   }
 
   get css() {
     return this.result.css
-  }
-
-  finally(onFinally) {
-    return this.async().then(onFinally, onFinally)
   }
 
   get map() {
@@ -4818,33 +4866,6 @@ class NoWorkResult {
 
   get [Symbol.toStringTag]() {
     return 'NoWorkResult'
-  }
-
-  sync() {
-    if (this.error) throw this.error
-    return this.result
-  }
-
-  then(onFulfilled, onRejected) {
-    if (true) {
-      if (!('from' in this._opts)) {
-        warnOnce(
-          'Without `from` option PostCSS could generate wrong source map ' +
-            'and will not find Browserslist config. Set it to CSS file path ' +
-            'or to `undefined` to prevent this warning.'
-        )
-      }
-    }
-
-    return this.async().then(onFulfilled, onRejected)
-  }
-
-  toString() {
-    return this._css
-  }
-
-  warnings() {
-    return []
   }
 }
 
@@ -5067,10 +5088,6 @@ class Node {
     return this.parent.nodes[index - 1]
   }
 
-  get proxyOf() {
-    return this
-  }
-
   rangeBy(opts) {
     let start = {
       column: this.source.start.column,
@@ -5238,6 +5255,10 @@ class Node {
     for (let i in opts) data[i] = opts[i]
     return result.warn(text, data)
   }
+
+  get proxyOf() {
+    return this
+  }
 }
 
 module.exports = Node
@@ -5373,6 +5394,7 @@ class Parser {
       if (brackets.length === 0) {
         if (type === ';') {
           node.source.end = this.getPosition(token[2])
+          node.source.end.offset++
           this.semicolon = true
           break
         } else if (type === '{') {
@@ -5387,6 +5409,7 @@ class Parser {
             }
             if (prev) {
               node.source.end = this.getPosition(prev[3] || prev[2])
+              node.source.end.offset++
             }
           }
           this.end(token)
@@ -5411,6 +5434,7 @@ class Parser {
       if (last) {
         token = params[params.length - 1]
         node.source.end = this.getPosition(token[3] || token[2])
+        node.source.end.offset++
         this.spaces = node.raws.between
         node.raws.between = ''
       }
@@ -5479,6 +5503,7 @@ class Parser {
     let node = new Comment()
     this.init(node, token[2])
     node.source.end = this.getPosition(token[3] || token[2])
+    node.source.end.offset++
 
     let text = token[1].slice(2, -2)
     if (/^\s*$/.test(text)) {
@@ -5510,6 +5535,7 @@ class Parser {
     node.source.end = this.getPosition(
       last[3] || last[2] || findLastWithPosition(tokens)
     )
+    node.source.end.offset++
 
     while (tokens[0][0] !== 'word') {
       if (tokens.length === 1) this.unknownWord(tokens)
@@ -5628,6 +5654,7 @@ class Parser {
 
     if (this.current.parent) {
       this.current.source.end = this.getPosition(token[2])
+      this.current.source.end.offset++
       this.current = this.current.parent
     } else {
       this.unexpectedClose(token)
@@ -5640,6 +5667,7 @@ class Parser {
       this.current.raws.semicolon = this.semicolon
     }
     this.current.raws.after = (this.current.raws.after || '') + this.spaces
+    this.root.source.end = this.getPosition(this.tokenizer.position())
   }
 
   freeSemicolon(token) {
@@ -6196,7 +6224,7 @@ let Root = __webpack_require__(/*! ./root */ "./node_modules/postcss/lib/root.js
 
 class Processor {
   constructor(plugins = []) {
-    this.version = '8.4.26'
+    this.version = '8.4.30'
     this.plugins = this.normalize(plugins)
   }
 
@@ -6279,10 +6307,6 @@ class Result {
     this.map = undefined
   }
 
-  get content() {
-    return this.css
-  }
-
   toString() {
     return this.css
   }
@@ -6302,6 +6326,10 @@ class Result {
 
   warnings() {
     return this.messages.filter(i => i.type === 'warning')
+  }
+
+  get content() {
+    return this.css
   }
 }
 
@@ -13223,7 +13251,7 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var sanitize_html__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! sanitize-html */ "./node_modules/sanitize-html/index.js");
 /* harmony import */ var sanitize_html__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(sanitize_html__WEBPACK_IMPORTED_MODULE_0__);
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
@@ -13321,8 +13349,7 @@ var MenuNestable = /*#__PURE__*/function () {
           var data_title = sanitize_html__WEBPACK_IMPORTED_MODULE_0___default()($('#node-title').val());
           var data_url = sanitize_html__WEBPACK_IMPORTED_MODULE_0___default()($('#node-url').val());
           var data_css_class = sanitize_html__WEBPACK_IMPORTED_MODULE_0___default()($('#node-css').val());
-          var data_icon = sanitize_html__WEBPACK_IMPORTED_MODULE_0___default()($('#node-icon').val());
-          var data_font_icon = sanitize_html__WEBPACK_IMPORTED_MODULE_0___default()($('#node-font_icon').val());
+          var data_font_icon = sanitize_html__WEBPACK_IMPORTED_MODULE_0___default()($('#node-icon').val());
           var data_target = sanitize_html__WEBPACK_IMPORTED_MODULE_0___default()($('#target').find('option:selected').val());
           var url_html = '<label class="pb-3"><span class="text" data-update="custom-url">Url</span><input type="text" data-old="' + data_url + '" value="' + data_url + '" name="custom-url"></label>';
           html += '<li data-reference-type="' + data_type + '" data-reference-id="' + data_reference_id + '" data-title="' + data_title + '" data-class="' + data_css_class + '" data-id="0" data-custom-url="' + data_url + '" data-icon-font="' + data_font_icon + '" data-target="' + data_target + '" class="dd-item dd3-item">';
@@ -13339,8 +13366,6 @@ var MenuNestable = /*#__PURE__*/function () {
           html += '<input type="text" data-old="' + data_title + '" value="' + data_title + '" name="title" class="form-control">';
           html += '</label>';
           html += url_html;
-          html += '<label class="pb-3"><span class="text" data-update="icon-font">Menu Imaget</span><input type="text" name="icon" value="' + data_icon + '" data-old="' + data_icon + '" class="form-control"></label>';
-          html += '<label class="pb-3">';
           html += '<label class="pb-3"><span class="text" data-update="icon-font">Icon - font</span><input type="text" name="icon-font" value="' + data_font_icon + '" data-old="' + data_font_icon + '" class="form-control"></label>';
           html += '<label class="pb-3">';
           html += '<span class="text" data-update="class">CSS class</span>';

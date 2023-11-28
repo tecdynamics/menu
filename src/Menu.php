@@ -16,8 +16,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Theme;
 use Throwable;
-use Tec\Menu\Enums\MenuTemplateEnum;
-
 
 class Menu
 {
@@ -263,6 +261,7 @@ class Menu
     public function generateMenu(array $args = [])
     {
         $this->load();
+        $args=apply_filters('menu_template_filter', $args);
 
         $view = Arr::get($args, 'view');
         $theme = Arr::get($args, 'theme', true);
@@ -298,17 +297,17 @@ class Menu
             'rowdata'=>Arr::get($args, 'rowdata',[])
         ];
 
+
         $data['options'] = $this->html->attributes(Arr::get($args, 'options', []));
 
-        if ($theme && !empty($view)  ) {
-            if($view=='default'){
-                $view=MenuTemplateEnum::DEFAULT;
-            }
-           return Theme::partial($view, $data);
+        if ($theme && $view) {
+            return Theme::partial($view, $data);
         }
-        if (!empty($view)&& !is_null($view)) {
+
+        if ($view) {
             return view($view, $data)->render();
         }
+
         return view('packages/menu::partials.default', $data)->render();
     }
 

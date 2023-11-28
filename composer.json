@@ -8,7 +8,8 @@
         }
     },
     "require": {
-        "php": ">=7.4"
+        "tecdynamics/platform": "*",
+        "tecdynamics/theme": "*"
     },
     "extra": {
         "laravel": {

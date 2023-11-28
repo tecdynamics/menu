@@ -3,6 +3,7 @@
 namespace Tec\Menu\Tables;
 
 use BaseHelper;
+use Illuminate\Http\JsonResponse;
 use RvMedia;
 use Tec\Base\Enums\BaseStatusEnum;
 use Tec\Menu\Repositories\Interfaces\MenuInterface;
@@ -46,20 +47,20 @@ class MenuTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function ajax()
+    public function ajax(): JsonResponse
     {
         $data = $this->table
             ->eloquent($this->query())
             ->editColumn('image', function ($item) {
-                return Html()->img(RvMedia::getImageUrl($item->image, 'thumb', false, RvMedia::getDefaultImage()))
-                    ->attributes(['alt'=> $item->name, 'width' => 50])->toHtml();
+                return Html::image(RvMedia::getImageUrl($item->image, 'thumb', false, RvMedia::getDefaultImage()),
+                    $item->name, ['width' => 50]);
             })
             ->editColumn('name', function ($item) {
                 if (!Auth::user()->hasPermission('menus.edit')) {
                     return $item->name;
                 }
 
-                return Html::a(route('menus.edit', $item->id), $item->name);
+                return Html::link(route('menus.edit', $item->id), $item->name);
             })
             ->editColumn('checkbox', function ($item) {
                 return $this->getCheckbox($item->id);
@@ -101,7 +102,7 @@ class MenuTable extends TableAbstract
     /**
      * {@inheritDoc}
      */
-    public function columns()
+    public function columns(): array
     {
         return [
             'id'         => [

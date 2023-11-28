@@ -6,7 +6,6 @@ use Tec\Base\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Request;
-use Tec\Slug\Models\Slug;
 
 class MenuNode extends BaseModel
 {
@@ -86,7 +85,7 @@ class MenuNode extends BaseModel
      */
     public function setUrlAttribute($value)
     {
-         $this->attributes['url'] = $value;
+        $this->attributes['url'] = $value;
     }
 
     /**

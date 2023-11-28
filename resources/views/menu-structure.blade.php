@@ -29,12 +29,8 @@
                                             <input type="text" class="form-control" id="node-url" placeholder="http://" autocomplete="false">
                                         </div>
                                         <div class="form-group mb-3">
-                                            <label for="node-icon_font">{{ trans('packages/menu::menu.icon') }}</label>
-                                            <input type="text" class="form-control" id="node-icon_font" placeholder="fa fa-home" autocomplete="false">
-                                        </div>
-                                        <div class="form-group mb-3">
-                                            <label for="node-icon">Image</label>
-                                            <input type="text" class="form-control" id="node-icon" placeholder="http://image.jpg" autocomplete="false">
+                                            <label for="node-icon">{{ trans('packages/menu::menu.icon') }}</label>
+                                            <input type="text" class="form-control" id="node-icon" placeholder="fa fa-home" autocomplete="false">
                                         </div>
                                         <div class="form-group mb-3">
                                             <label for="node-css">{{ trans('packages/menu::menu.css_class') }}</label>
