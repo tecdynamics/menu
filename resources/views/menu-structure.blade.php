@@ -44,6 +44,7 @@
                                     >
                                         {!! app(Tec\Base\Forms\FormBuilder::class)->create(Tec\Menu\Forms\MenuNodeForm::class)->renderForm([], false, true, false) !!}
 
+
                                         <div class="form-group mb-3">
                                             <div class="text-end add-button">
                                                 <div class="btn-group">
@@ -80,7 +81,7 @@
                         id="nestable"
                         data-depth="0"
                     >
-                        {!! Menu::generateMenu([
+                        {!! Tec\Menu\Facades\Menu::generateMenu([
                             'slug' => $menu->slug,
                             'view' => 'packages/menu::partials.menu',
                             'theme' => false,
@@ -106,7 +107,7 @@
                                 <p><i>{{ trans('packages/menu::menu.display_location') }}</i></p>
                             </div>
                             <div class="col-md-8">
-                                @foreach (Menu::getMenuLocations() as $location => $description)
+                                @foreach (Tec\Menu\Facades\Menu::getMenuLocations() as $location => $description)
                                     <div>
                                         <input
                                             id="menu_location_{{ $location }}"

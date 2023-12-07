@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Request;
 
+
 class MenuNode extends BaseModel
 {
     protected $table = 'menu_nodes';

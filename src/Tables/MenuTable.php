@@ -2,7 +2,12 @@
 
 namespace Tec\Menu\Tables;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Tec\Base\Enums\BaseStatusEnum;
+use Tec\Base\Facades\BaseHelper;
+use Tec\Base\Facades\Html;
+use Tec\Media\Facades\RvMedia;
 use Tec\Menu\Models\Menu;
 use Tec\Table\Abstracts\TableAbstract;
 use Tec\Table\Actions\DeleteAction;
@@ -31,6 +36,44 @@ class MenuTable extends TableAbstract
                 'status',
             ]));
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function ajax(): JsonResponse
+    {
+        $data = $this->table
+            ->eloquent($this->query())
+            ->editColumn('image', function ($item) {
+                return Html::image(RvMedia::getImageUrl($item->image, 'thumb', false, RvMedia::getDefaultImage()),
+                    $item->name, ['width' => 50]);
+            })
+            ->editColumn('name', function ($item) {
+                if (!Auth::user()->hasPermission('menus.edit')) {
+                    return $item->name;
+                }
+
+                return Html::link(route('menus.edit', $item->id), $item->name);
+            })
+            ->editColumn('checkbox', function ($item) {
+                return $this->getCheckbox($item->id);
+            })
+            ->editColumn('created_at', function ($item) {
+                return BaseHelper::formatDate($item->created_at);
+            })
+            ->editColumn('template', function ($item) {
+                return ucfirst($item->template);
+            })
+            ->editColumn('status', function ($item) {
+                return $item->status->toHtml();
+            })
+            ->addColumn('operations', function ($item) {
+                return $this->getOperations('menus.edit', 'menus.destroy', $item);
+            });
+
+        return $this->toJson($data);
+    }
+
 
     public function columns(): array
     {

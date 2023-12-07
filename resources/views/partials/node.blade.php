@@ -35,7 +35,7 @@
     </div>
     <div class="clearfix"></div>
     @if ($row->has_child)
-        {!! Menu::generateMenu([
+        {!! Tec\Menu\Facades\Menu::generateMenu([
             'menu' => $menu,
             'menu_nodes' => $row->child,
             'view' => 'packages/menu::partials.menu',

@@ -14,7 +14,7 @@
             </label>
 
             @if ($row->children)
-                {!! Menu::generateSelect([
+                {!! Tec\Menu\Facades\Menu::generateSelect([
                     'model' => $model,
                     'items' => $row->children,
                 ]) !!}

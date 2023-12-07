@@ -5,6 +5,7 @@ namespace Tec\Menu\Forms;
 use Tec\Base\Enums\BaseStatusEnum;
 use Tec\Base\Facades\Assets;
 use Tec\Base\Forms\FormAbstract;
+use Tec\Menu\Enums\MenuTemplateEnum;
 use Tec\Menu\Http\Requests\MenuRequest;
 use Tec\Menu\Models\Menu;
 
@@ -26,7 +27,6 @@ class MenuForm extends FormAbstract
         if ($this->getModel()) {
             $locations = $this->getModel()->locations()->pluck('location')->all();
         }
-
         $this
             ->setupModel(new Menu())
             ->setFormOption('class', 'form-save-menu')
@@ -40,10 +40,21 @@ class MenuForm extends FormAbstract
                     'data-counter' => 120,
                 ],
             ])
+           ->add('image', 'mediaImage', [
+                'label'      => trans('packages/menu::menu.image'),
+                'label_attr' => ['class' => 'control-label'],
+            ])
+            ->add('template', 'customSelect', [
+                'label'      => trans('packages/menu::menu.template'),
+                'label_attr' => ['class' => 'control-label'],
+                'choices'    => array_map(function($e){
+                    return ucfirst(implode(' ',explode('_',$e))); },  MenuTemplateEnum::labels()),
+
+            ])
             ->add('status', 'customSelect', [
-                'label' => trans('core/base::tables.status'),
-                'required' => true,
-                'choices' => BaseStatusEnum::labels(),
+                'label'      => trans('core/base::tables.status'),
+                'label_attr' => ['class' => 'control-label required'],
+                'choices'    => BaseStatusEnum::labels(),
             ])
             ->addMetaBoxes([
                 'structure' => [

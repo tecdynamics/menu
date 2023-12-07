@@ -8,8 +8,8 @@
         }
     },
     "require": {
-        "Tec/platform": "*@dev",
-        "Tec/theme": "*@dev"
+        "tecdynamics/platform": "*",
+        "tecdynamics/theme": "*"
     },
     "extra": {
         "laravel": {

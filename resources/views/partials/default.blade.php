@@ -13,7 +13,7 @@
                 <span>{!! BaseHelper::clean($row->title) !!}</span>
             </a>
             @if ($row->has_child)
-                {!! Menu::generateMenu([
+                {!! Tec\Menu\Facades\Menu::generateMenu([
                     'menu' => $menu,
                     'menu_nodes' => $row->child,
                 ]) !!}
