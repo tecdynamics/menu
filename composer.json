@@ -1,5 +1,5 @@
 {
-    "name": "Tec/menu",
+    "name": "tecdynamics/menu",
     "description": "Menu package",
     "type": "package",
     "autoload": {
