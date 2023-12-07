@@ -2,8 +2,8 @@
 
 namespace Tec\Menu\Facades;
 
-use Illuminate\Support\Facades\Facade;
 use Tec\Menu\Menu as BaseMenu;
+use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static bool hasMenu(string $slug)
@@ -23,10 +23,10 @@ use Tec\Menu\Menu as BaseMenu;
  * @method static \Tec\Menu\Menu setMenuOptionModels(array $models)
  * @method static \Tec\Menu\Menu clearCacheMenuItems()
  * @method static void useMenuItemIconImage()
- * @deprecated
+ *
  * @see \Tec\Menu\Menu
  */
-class MenuFacade extends Facade
+class Menu extends Facade
 {
     protected static function getFacadeAccessor(): string
     {

@@ -6,105 +6,54 @@ use Tec\Base\Events\BeforeEditContentEvent;
 use Tec\Base\Events\CreatedContentEvent;
 use Tec\Base\Events\DeletedContentEvent;
 use Tec\Base\Events\UpdatedContentEvent;
+use Tec\Base\Facades\PageTitle;
 use Tec\Base\Forms\FormBuilder;
 use Tec\Base\Http\Controllers\BaseController;
 use Tec\Base\Http\Responses\BaseHttpResponse;
+use Tec\Menu\Facades\Menu;
 use Tec\Menu\Forms\MenuForm;
+use Tec\Menu\Http\Requests\MenuNodeRequest;
 use Tec\Menu\Http\Requests\MenuRequest;
+use Tec\Menu\Models\Menu as MenuModel;
+use Tec\Menu\Models\MenuLocation;
+use Tec\Menu\Models\MenuNode;
 use Tec\Menu\Repositories\Eloquent\MenuRepository;
-use Tec\Menu\Repositories\Interfaces\MenuInterface;
-use Tec\Menu\Repositories\Interfaces\MenuLocationInterface;
-use Tec\Menu\Repositories\Interfaces\MenuNodeInterface;
 use Tec\Menu\Tables\MenuTable;
 use Tec\Support\Services\Cache\Cache;
 use Exception;
 use Illuminate\Cache\CacheManager;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Menu;
 use stdClass;
-use Throwable;
 
 class MenuController extends BaseController
 {
+    protected Cache $cache;
 
-    /**
-     * @var MenuInterface
-     */
-    protected $menuRepository;
-
-    /**
-     * @var MenuNodeInterface
-     */
-    protected $menuNodeRepository;
-
-    /**
-     * @var MenuLocationInterface
-     */
-    protected $menuLocationRepository;
-
-    /**
-     * @var Cache
-     */
-    protected $cache;
-
-    /**
-     * MenuController constructor.
-     * @param MenuInterface $menuRepository
-     * @param MenuNodeInterface $menuNodeRepository
-     * @param MenuLocationInterface $menuLocationRepository
-     * @param CacheManager $cache
-     */
-    public function __construct(
-        MenuInterface $menuRepository,
-        MenuNodeInterface $menuNodeRepository,
-        MenuLocationInterface $menuLocationRepository,
-        CacheManager $cache
-    ) {
-        $this->menuRepository = $menuRepository;
-        $this->menuNodeRepository = $menuNodeRepository;
-        $this->menuLocationRepository = $menuLocationRepository;
+    public function __construct(CacheManager $cache)
+    {
         $this->cache = new Cache($cache, MenuRepository::class);
     }
 
-    /**
-     * @param MenuTable $dataTable
-     * @return Factory|View
-     * @throws Throwable
-     */
-    public function index(MenuTable $dataTable)
+    public function index(MenuTable $table)
     {
-        page_title()->setTitle(trans('packages/menu::menu.name'));
+        PageTitle::setTitle(trans('packages/menu::menu.name'));
 
-        return $dataTable->renderTable();
+        return $table->renderTable();
     }
 
-    /**
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
     public function create(FormBuilder $formBuilder)
     {
-        page_title()->setTitle(trans('packages/menu::menu.create'));
+        PageTitle::setTitle(trans('packages/menu::menu.create'));
 
         return $formBuilder->create(MenuForm::class)->renderForm();
     }
 
-    /**
-     * @param MenuRequest $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
     public function store(MenuRequest $request, BaseHttpResponse $response)
     {
-        $menu = $this->menuRepository->getModel();
+        $menu = new MenuModel();
 
         $menu->fill($request->input());
-        $menu->slug = $this->menuRepository->createSlug($request->input('name'));
-        $menu = $this->menuRepository->createOrUpdate($menu);
+        $menu->save();
 
         $this->cache->flush();
 
@@ -114,28 +63,22 @@ class MenuController extends BaseController
 
         return $response
             ->setPreviousUrl(route('menus.index'))
-            ->setNextUrl(route('menus.edit', $menu->id))
+            ->setNextUrl(route('menus.edit', $menu->getKey()))
             ->setMessage(trans('core/base::notices.create_success_message'));
     }
 
-    /**
-     * @param Model $menu
-     * @param Request $request
-     * @return bool
-     * @throws Exception
-     */
-    protected function saveMenuLocations($menu, Request $request)
+    protected function saveMenuLocations(MenuModel $menu, Request $request): bool
     {
         $locations = $request->input('locations', []);
 
-        $this->menuLocationRepository->deleteBy([
-            'menu_id' => $menu->id,
-            ['location', 'NOT_IN', $locations],
-        ]);
+        MenuLocation::query()
+            ->where('menu_id', $menu->getKey())
+            ->whereNotIn('location', $locations)
+            ->each(fn (MenuLocation $location) => $location->delete());
 
         foreach ($locations as $location) {
-            $menuLocation = $this->menuLocationRepository->firstOrCreate([
-                'menu_id'  => $menu->id,
+            $menuLocation = MenuLocation::query()->firstOrCreate([
+                'menu_id' => $menu->getKey(),
                 'location' => $location,
             ]);
 
@@ -145,55 +88,51 @@ class MenuController extends BaseController
         return true;
     }
 
-    /**
-     * @param int $id
-     * @param Request $request
-     * @param FormBuilder $formBuilder
-     * @return string
-     */
-    public function edit($id, FormBuilder $formBuilder, Request $request)
+    public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
-        page_title()->setTitle(trans('packages/menu::menu.edit'));
-
         $oldInputs = old();
         if ($oldInputs && $id == 0) {
-            $oldObject = new stdClass;
+            $oldObject = new stdClass();
             foreach ($oldInputs as $key => $row) {
                 $oldObject->$key = $row;
             }
             $menu = $oldObject;
         } else {
-            $menu = $this->menuRepository->findOrFail($id);
+            $menu = MenuModel::query()->findOrFail($id);
         }
 
+        PageTitle::setTitle(trans('core/base::forms.edit_item', ['name' => $menu->name]));
+
+        /**
+         * @var MenuModel $menu
+         */
         event(new BeforeEditContentEvent($request, $menu));
 
         return $formBuilder->create(MenuForm::class, ['model' => $menu])->renderForm();
     }
 
-    /**
-     * @param MenuRequest $request
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
-    public function update(MenuRequest $request, $id, BaseHttpResponse $response)
+    public function update(int|string $id, MenuRequest $request, BaseHttpResponse $response)
     {
-        $menu = $this->menuRepository->firstOrNew(compact('id'));
+        $menu = MenuModel::query()->findOrFail($id);
 
         $menu->fill($request->input());
-        $this->menuRepository->createOrUpdate($menu);
+        $menu->save();
+
         event(new UpdatedContentEvent(MENU_MODULE_SCREEN_NAME, $request, $menu));
 
+        /**
+         * @var MenuModel $menu
+         */
         $this->saveMenuLocations($menu, $request);
 
-        $deletedNodes = ltrim($request->input('deleted_nodes', ''));
-        if ($deletedNodes) {
-            $deletedNodes = explode(' ', ltrim($request->input('deleted_nodes', '')));
-            $this->menuNodeRepository->deleteBy([['id', 'IN', $deletedNodes]]);
+        $deletedNodes = ltrim((string)$request->input('deleted_nodes', ''));
+        if ($deletedNodes && $deletedNodes = array_filter(explode(' ', $deletedNodes))) {
+            $menu->menuNodes()->whereIn('id', $deletedNodes)->delete();
         }
-        Menu::recursiveSaveMenu(json_decode($request->input('menu_nodes'), true), $menu->id, 0);
+
+        $menuNodes = Menu::recursiveSaveMenu((array)json_decode($request->input('menu_nodes'), true), $menu->getKey(), 0);
+
+        $request->merge(['menu_nodes', json_encode($menuNodes)]);
 
         $this->cache->flush();
 
@@ -202,18 +141,10 @@ class MenuController extends BaseController
             ->setMessage(trans('core/base::notices.update_success_message'));
     }
 
-    /**
-     * @param Request $request
-     * @param int $id
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     */
-    public function destroy(Request $request, $id, BaseHttpResponse $response)
+    public function destroy(MenuModel $menu, Request $request, BaseHttpResponse $response)
     {
         try {
-            $menu = $this->menuRepository->findOrFail($id);
-            $this->menuNodeRepository->deleteBy(['menu_id' => $menu->id]);
-            $this->menuRepository->delete($menu);
+            $menu->delete();
 
             event(new DeletedContentEvent(MENU_MODULE_SCREEN_NAME, $request, $menu));
 
@@ -225,29 +156,21 @@ class MenuController extends BaseController
         }
     }
 
-    /**
-     * @param Request $request
-     * @param BaseHttpResponse $response
-     * @return BaseHttpResponse
-     * @throws Exception
-     */
-    public function deletes(Request $request, BaseHttpResponse $response)
+    public function getNode(MenuNodeRequest $request, BaseHttpResponse $response)
     {
-        $ids = $request->input('ids');
+        $data = (array)$request->input('data', []);
 
-        if (empty($ids)) {
-            return $response
-                ->setError()
-                ->setMessage(trans('core/base::notices.no_select'));
-        }
+        $row = new MenuNode();
+        $row->fill($data);
+        $row = Menu::getReferenceMenuNode($data, $row);
+        $row->save();
 
-        foreach ($ids as $id) {
-            $menu = $this->menuRepository->findOrFail($id);
-            $this->menuNodeRepository->deleteBy(['menu_id' => $menu->id]);
-            $this->menuRepository->delete($menu);
-            event(new DeletedContentEvent(MENU_MODULE_SCREEN_NAME, $request, $menu));
-        }
+        event(new CreatedContentEvent(MENU_NODE_MODULE_SCREEN_NAME, $request, $row));
 
-        return $response->setMessage(trans('core/base::notices.delete_success_message'));
+        $html = view('packages/menu::partials.node', compact('row'))->render();
+
+        return $response
+            ->setData(compact('html'))
+            ->setMessage(trans('core/base::notices.create_success_message'));
     }
 }

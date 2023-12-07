@@ -4,27 +4,24 @@ namespace Tec\Menu\Repositories\Eloquent;
 
 use Tec\Menu\Repositories\Interfaces\MenuNodeInterface;
 use Tec\Support\Repositories\Eloquent\RepositoriesAbstract;
+use Illuminate\Database\Eloquent\Collection;
 
 class MenuNodeRepository extends RepositoriesAbstract implements MenuNodeInterface
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function getByMenuId($menuId, $parentId, $select = ['*'], array $with = ['child'])
+    public function getByMenuId(int|string $menuId, int|string|null $parentId, array $select = ['*'], array $with = ['child']): Collection
     {
         $data = $this->model
             ->with($with)
             ->where([
-                'menu_id'   => $menuId,
+                'menu_id' => $menuId,
                 'parent_id' => $parentId,
             ]);
 
-        if (!empty($select)) {
+        if (! empty($select)) {
             $data = $data->select($select);
         }
 
-        $data = $data->orderBy('position', 'asc')
-            ->get();
+        $data = $data->orderBy('position')->get();
 
         $this->resetModel();
 

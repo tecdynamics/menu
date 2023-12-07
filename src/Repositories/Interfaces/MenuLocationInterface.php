@@ -6,5 +6,4 @@ use Tec\Support\Repositories\Interfaces\RepositoryInterface;
 
 interface MenuLocationInterface extends RepositoryInterface
 {
-
 }

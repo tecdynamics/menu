@@ -2,20 +2,15 @@
 
 namespace Tec\Menu\Forms;
 
-use Assets;
 use Tec\Base\Enums\BaseStatusEnum;
+use Tec\Base\Facades\Assets;
 use Tec\Base\Forms\FormAbstract;
-use Tec\Menu\Enums\MenuTemplateEnum;
 use Tec\Menu\Http\Requests\MenuRequest;
 use Tec\Menu\Models\Menu;
 
 class MenuForm extends FormAbstract
 {
-
-    /**
-     * {@inheritDoc}
-     */
-    public function buildForm()
+    public function buildForm(): void
     {
         Assets::addScriptsDirectly([
             'vendor/core/packages/menu/libraries/jquery-nestable/jquery.nestable.js',
@@ -33,38 +28,28 @@ class MenuForm extends FormAbstract
         }
 
         $this
-            ->setupModel(new Menu)
+            ->setupModel(new Menu())
             ->setFormOption('class', 'form-save-menu')
             ->withCustomFields()
             ->setValidatorClass(MenuRequest::class)
             ->add('name', 'text', [
-                'label'      => trans('core/base::forms.name'),
-                'label_attr' => ['class' => 'control-label required'],
-                'attr'       => [
-                    'placeholder'  => trans('core/base::forms.name_placeholder'),
+                'label' => trans('core/base::forms.name'),
+                'required' => true,
+                'attr' => [
+                    'placeholder' => trans('core/base::forms.name_placeholder'),
                     'data-counter' => 120,
                 ],
             ])
             ->add('status', 'customSelect', [
-                'label'      => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
-                'choices'    => BaseStatusEnum::labels(),
-            ])
-            ->add('image', 'mediaImage', [
-                'label'      => trans('packages/menu::menu.image'),
-                'label_attr' => ['class' => 'control-label'],
-            ])
-            ->add('template', 'customSelect', [
-                'label'      => trans('packages/menu::menu.template'),
-                'label_attr' => ['class' => 'control-label'],
-                'choices'    => array_map(function($e){
-                    return ucfirst(implode(' ',explode('_',$e))); },  MenuTemplateEnum::labels()),
+                'label' => trans('core/base::tables.status'),
+                'required' => true,
+                'choices' => BaseStatusEnum::labels(),
             ])
             ->addMetaBoxes([
                 'structure' => [
-                    'wrap'    => false,
+                    'wrap' => false,
                     'content' => view('packages/menu::menu-structure', [
-                        'menu'      => $this->getModel(),
+                        'menu' => $this->getModel(),
                         'locations' => $locations,
                     ])->render(),
                 ],

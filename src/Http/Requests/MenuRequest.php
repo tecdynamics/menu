@@ -8,16 +8,12 @@ use Illuminate\Validation\Rule;
 
 class MenuRequest extends Request
 {
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
-            'name'   => 'required|min:3|max:120',
+            'name' => 'required|string|min:3|max:120',
+            'deleted_nodes' => 'nullable|string',
+            'menu_nodes' => 'nullable|string',
             'status' => Rule::in(BaseStatusEnum::values()),
         ];
     }

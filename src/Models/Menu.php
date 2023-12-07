@@ -2,27 +2,18 @@
 
 namespace Tec\Menu\Models;
 
+use Tec\Base\Casts\SafeContent;
 use Tec\Base\Enums\BaseStatusEnum;
 use Tec\Base\Models\BaseModel;
-use Tec\Base\Traits\EnumCastable;
+use Tec\Base\Models\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Tec\Menu\Enums\MenuTemplateEnum;
 
 class Menu extends BaseModel
 {
+    use HasSlug;
 
-    use EnumCastable;
-
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
     protected $table = 'menus';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'name',
         'slug',
@@ -31,35 +22,29 @@ class Menu extends BaseModel
         'template'
     ];
 
-    /**
-     * @var array
-     */
     protected $casts = [
         'status' => BaseStatusEnum::class,
-        'template' => MenuTemplateEnum::class,
+        'name' => SafeContent::class,
     ];
 
-    protected static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
+        static::deleting(function (self $model) {
+            $model->menuNodes()->delete();
+            $model->locations()->delete();
+        });
 
-        static::deleting(function (Menu $menu) {
-            MenuNode::where('menu_id', $menu->id)->delete();
+        self::saving(function (self $model) {
+            $model->slug = self::createSlug($model->slug, $model->getKey());
         });
     }
 
-    /**
-     * @return HasMany
-     */
-    public function menuNodes()
+    public function menuNodes(): HasMany
     {
         return $this->hasMany(MenuNode::class, 'menu_id');
     }
 
-    /**
-     * @return HasMany
-     */
-    public function locations()
+    public function locations(): HasMany
     {
         return $this->hasMany(MenuLocation::class, 'menu_id');
     }

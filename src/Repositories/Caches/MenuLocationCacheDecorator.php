@@ -2,9 +2,11 @@
 
 namespace Tec\Menu\Repositories\Caches;
 
-use Tec\Menu\Repositories\Interfaces\MenuLocationInterface;
-use Tec\Support\Repositories\Caches\CacheAbstractDecorator;
+use Tec\Menu\Repositories\Eloquent\MenuLocationRepository;
 
-class MenuLocationCacheDecorator extends CacheAbstractDecorator implements MenuLocationInterface
+/**
+ * @deprecated
+ */
+class MenuLocationCacheDecorator extends MenuLocationRepository
 {
 }

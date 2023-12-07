@@ -1,6 +1,6 @@
 {
-    "name": "tecdynamics/menu",
-    "description": "Tec Menu package",
+    "name": "Tec/menu",
+    "description": "Menu package",
     "type": "package",
     "autoload": {
         "psr-4": {
@@ -8,7 +8,8 @@
         }
     },
     "require": {
-        "php": ">=7.4"
+        "Tec/platform": "*@dev",
+        "Tec/theme": "*@dev"
     },
     "extra": {
         "laravel": {
@@ -16,7 +17,7 @@
                 "Tec\\Menu\\Providers\\MenuServiceProvider"
             ],
             "aliases": {
-                "Menu": "Tec\\Menu\\Facades\\MenuFacade"
+                "Menu": "Tec\\Menu\\Facades\\Menu"
             }
         }
     }

@@ -3,44 +3,22 @@
 namespace Tec\Menu\Listeners;
 
 use Tec\Base\Events\DeletedContentEvent;
-use Tec\Menu\Repositories\Interfaces\MenuNodeInterface;
-use Exception;
-use Menu;
+use Tec\Menu\Facades\Menu;
+use Tec\Menu\Models\MenuNode;
 
 class DeleteMenuNodeListener
 {
-
-    /**
-     * @var MenuNodeInterface
-     */
-    protected $menuNodeRepository;
-
-    /**
-     * DeletedContentListener constructor.
-     * @param MenuNodeInterface $menuNodeRepository
-     */
-    public function __construct(MenuNodeInterface $menuNodeRepository)
+    public function handle(DeletedContentEvent $event): void
     {
-        $this->menuNodeRepository = $menuNodeRepository;
-    }
-
-    /**
-     * Handle the event.
-     *
-     * @param DeletedContentEvent $event
-     * @return void
-     */
-    public function handle(DeletedContentEvent $event)
-    {
-        if (in_array(get_class($event->data), Menu::getMenuOptionModels())) {
-            try {
-                $this->menuNodeRepository->deleteBy([
-                    'reference_id'   => $event->data->id,
-                    'reference_type' => get_class($event->data),
-                ]);
-            } catch (Exception $exception) {
-                info($exception->getMessage());
-            }
+        if (! in_array(get_class($event->data), Menu::getMenuOptionModels())) {
+            return;
         }
+
+        MenuNode::query()
+            ->where([
+                'reference_id' => $event->data->getKey(),
+                'reference_type' => get_class($event->data),
+            ])
+            ->delete();
     }
 }

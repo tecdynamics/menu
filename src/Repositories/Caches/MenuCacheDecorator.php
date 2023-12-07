@@ -2,25 +2,11 @@
 
 namespace Tec\Menu\Repositories\Caches;
 
-use Tec\Menu\Repositories\Interfaces\MenuInterface;
-use Tec\Support\Repositories\Caches\CacheAbstractDecorator;
+use Tec\Menu\Repositories\Eloquent\MenuRepository;
 
-class MenuCacheDecorator extends CacheAbstractDecorator implements MenuInterface
+/**
+ * @deprecated
+ */
+class MenuCacheDecorator extends MenuRepository
 {
-
-    /**
-     * {@inheritDoc}
-     */
-    public function findBySlug($slug, $active, array $select = [], array $with = [])
-    {
-        return $this->getDataIfExistCache(__FUNCTION__, func_get_args());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function createSlug($name)
-    {
-        return $this->flushCacheAndUpdateData(__FUNCTION__, func_get_args());
-    }
 }

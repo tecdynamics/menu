@@ -2,23 +2,12 @@
 
 namespace Tec\Menu\Repositories\Interfaces;
 
+use Tec\Base\Models\BaseModel;
 use Tec\Support\Repositories\Interfaces\RepositoryInterface;
 
 interface MenuInterface extends RepositoryInterface
 {
+    public function findBySlug(string $slug, bool $active, array $select = [], array $with = []): BaseModel|null;
 
-    /**
-     * @param string $slug
-     * @param bool $active
-     * @param array $select
-     * @param array $with
-     * @return mixed
-     */
-    public function findBySlug($slug, $active, array $select = [], array $with = []);
-
-    /**
-     * @param string $name
-     * @return mixed
-     */
-    public function createSlug($name);
+    public function createSlug(string $name): string;
 }
