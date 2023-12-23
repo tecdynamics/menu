@@ -58,13 +58,25 @@ class MenuNodeForm extends FormAbstract
                 'label' => trans('packages/menu::menu.icon'),
                 'label_attr' => [
                     'class' => 'control-label',
-                    'data-update' => 'icon',
+                    'data-update' => 'icon_font',
                     'for' => 'menu-node-icon-font-' . $id,
                 ],
                 'attr' => [
                     'placeholder' => trans('packages/menu::menu.icon_placeholder'),
                     'data-old' => $this->model->icon_font,
                     'id' => 'menu-node-icon-font-' . $id,
+                ],
+            ])
+            ->add('icon', 'mediaImage', [
+                'label' => 'Image',
+                'label_attr' => [
+                    'class' => 'control-label',
+                    'data-update' => 'icon',
+                    'for' => 'menu-node-icon-font-' . $id,
+                ],
+                'attr' => [
+                    'data-old' => $this->model->icon,
+                    'id' => 'menu-node-icon-' . $id,
                 ],
             ])
             ->add('css_class', 'text', [
