@@ -24,6 +24,7 @@ use Exception;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Http\Request;
 use stdClass;
+use Tec\Menu\Events\RenderingMenuOptions;
 
 class MenuController extends BaseController
 {
@@ -43,6 +44,7 @@ class MenuController extends BaseController
 
     public function create(FormBuilder $formBuilder)
     {
+        RenderingMenuOptions::dispatch();
         PageTitle::setTitle(trans('packages/menu::menu.create'));
 
         return $formBuilder->create(MenuForm::class)->renderForm();
@@ -90,6 +92,7 @@ class MenuController extends BaseController
 
     public function edit(int|string $id, FormBuilder $formBuilder, Request $request)
     {
+        RenderingMenuOptions::dispatch();
         $oldInputs = old();
         if ($oldInputs && $id == 0) {
             $oldObject = new stdClass();
