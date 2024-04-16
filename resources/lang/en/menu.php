@@ -25,4 +25,6 @@ return [
     'url_placeholder' => 'URL',
     'css_class_placeholder' => 'CSS class',
     'menu_id' => 'Menu ID',
+		'image'=>'Image',
+		'template'=>'Template'
 ];

@@ -64,9 +64,9 @@ class MenuNestable {
                 currentInfo[name] = value
 
                 parent.data('menu-item', currentInfo)
-                parent.find('> .dd3-content .text[data-update="' + name + '"]').text(value)
+                parent.find('> .dd3-content .fw-medium[data-update="' + name + '"]').text(value)
                 if (value.trim() === '') {
-                    parent.find('> .dd3-content .text[data-update="' + name + '"]').text(old)
+                    parent.find('> .dd3-content .fw-medium[data-update="' + name + '"]').text(old)
                 }
             }
         )
@@ -75,9 +75,9 @@ class MenuNestable {
         $(document).on('click', '.box-links-for-menu .btn-add-to-menu', (e) => {
             e.preventDefault()
             let current = $(e.currentTarget)
-            let parent = current.parents('.the-box')
+            let parent = current.closest('.box-links-for-menu').find('.the-box')
 
-            const position = $('#nestable .dd-list .dd-item').length + 1;
+            const position = $('#nestable .dd-list .dd-item').length + 1
 
             if (parent.attr('id') === 'external_link') {
                 const params = {}
@@ -91,29 +91,34 @@ class MenuNestable {
 
                 params.position = position + 1
 
-                createMenuNode(params, that, parent)
+                createMenuNode(params, that, parent, current.data('url'))
             } else {
                 parent.find('.list-item li.active').each((index, el) => {
-                    let $label = $(el).find('> label')
+                    const findIn = $(el).find('> label > input[type=checkbox]')
 
                     const params = {}
 
-                    params.reference_type = sanitizeHTML($label.data('reference-type'))
-                    params.reference_id = sanitizeHTML($label.data('reference-id'))
-                    params.title = sanitizeHTML($label.data('title'))
-                    params.menu_id = sanitizeHTML($label.data('menu-id'))
+                    params.reference_type = sanitizeHTML(findIn.data('reference-type'))
+                    params.reference_id = sanitizeHTML(findIn.data('reference-id'))
+                    params.title = sanitizeHTML(findIn.data('title'))
+                    params.menu_id = sanitizeHTML(findIn.data('menu-id'))
+
+                    params.reference_type = sanitizeHTML(findIn.data('reference-type'))
+                    params.reference_id = sanitizeHTML(findIn.data('reference-id'))
+                    params.title = sanitizeHTML(findIn.data('title'))
+                    params.menu_id = sanitizeHTML(findIn.data('menu-id'))
 
                     params.position = position + index
 
-                    createMenuNode(params, that, parent)
+                    createMenuNode(params, that, parent, current.data('url'))
                 })
             }
         })
 
-        let createMenuNode = (params, current, parent) => {
+        let createMenuNode = (params, current, parent, url) => {
             $httpClient
                 .make()
-                .get(route('menus.get-node'), { data: params })
+                .get(url, { data: params })
                 .then(({ data }) => {
                     current.appendMenuNode(data.data.html, parent)
                 })
@@ -169,8 +174,6 @@ class MenuNestable {
 
         accordion.on('hidden.bs.collapse', toggleChevron)
         accordion.on('shown.bs.collapse', toggleChevron)
-
-        Tec.callScroll($('.list-item'))
     }
 
     appendMenuNode(html, parent) {
@@ -197,6 +200,6 @@ class MenuNestable {
     }
 }
 
-$(document).ready(() => {
+$(() => {
     new MenuNestable().init()
 })
