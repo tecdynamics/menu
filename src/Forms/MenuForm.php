@@ -4,6 +4,10 @@ namespace Tec\Menu\Forms;
 
 use Tec\Base\Enums\BaseStatusEnum;
 use Tec\Base\Facades\Assets;
+use Tec\Base\Forms\FieldOptions\NameFieldOption;
+use Tec\Base\Forms\FieldOptions\StatusFieldOption;
+use Tec\Base\Forms\Fields\SelectField;
+use Tec\Base\Forms\Fields\TextField;
 use Tec\Base\Forms\FormAbstract;
 use Tec\Menu\Enums\MenuTemplateEnum;
 use Tec\Menu\Http\Requests\MenuRequest;
@@ -13,14 +17,10 @@ class MenuForm extends FormAbstract
 {
     public function buildForm(): void
     {
-        Assets::addScriptsDirectly([
-            'vendor/core/packages/menu/libraries/jquery-nestable/jquery.nestable.js',
-            'vendor/core/packages/menu/js/menu.js',
-        ])
-            ->addStylesDirectly([
-                'vendor/core/packages/menu/libraries/jquery-nestable/jquery.nestable.css',
-                'vendor/core/packages/menu/css/menu.css',
-            ]);
+			 Assets::addStyles('jquery-nestable')
+					->addScripts('jquery-nestable')
+					->addScriptsDirectly('vendor/core/packages/menu/js/menu.js')
+					->addStylesDirectly('vendor/core/packages/menu/css/menu.css');
 
         $locations = [];
 
@@ -28,19 +28,12 @@ class MenuForm extends FormAbstract
             $locations = $this->getModel()->locations()->pluck('location')->all();
         }
         $this
-            ->setupModel(new Menu())
-            ->setFormOption('class', 'form-save-menu')
+					 ->model(Menu::class)
+					 ->setFormOption('class', 'form-save-menu')
             ->withCustomFields()
             ->setValidatorClass(MenuRequest::class)
-            ->add('name', 'text', [
-                'label' => trans('core/base::forms.name'),
-                'required' => true,
-                'attr' => [
-                    'placeholder' => trans('core/base::forms.name_placeholder'),
-                    'data-counter' => 120,
-                ],
-            ])
-           ->add('image', 'mediaImage', [
+					  ->add('name', TextField::class, NameFieldOption::make()->required()->maxLength(120)->toArray())
+            ->add('image', 'mediaImage', [
                 'label'      => trans('packages/menu::menu.image'),
                 'label_attr' => ['class' => 'control-label'],
             ])
@@ -51,20 +44,18 @@ class MenuForm extends FormAbstract
                     return ucfirst(implode(' ',explode('_',$e))); },  MenuTemplateEnum::labels()),
 
             ])
-            ->add('status', 'customSelect', [
-                'label'      => trans('core/base::tables.status'),
-                'label_attr' => ['class' => 'control-label required'],
-                'choices'    => BaseStatusEnum::labels(),
-            ])
-            ->addMetaBoxes([
-                'structure' => [
-                    'wrap' => false,
-                    'content' => view('packages/menu::menu-structure', [
-                        'menu' => $this->getModel(),
-                        'locations' => $locations,
-                    ])->render(),
-                ],
-            ])
+					 ->add('status', SelectField::class, StatusFieldOption::make()->toArray())
+					 ->addMetaBoxes([
+														 'structure' => [
+																'wrap' => false,
+																'content' => function () {
+																	 return view('packages/menu::menu-structure', [
+																			'menu' => $this->getModel(),
+																			'locations' => $this->getModel()->getKey() ? $this->getModel()->locations()->pluck('location')->all() : [],
+																	 ])->render();
+																},
+														 ],
+													])
             ->setBreakFieldPoint('status');
     }
 }
