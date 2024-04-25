@@ -72,8 +72,7 @@ class MenuController extends BaseController
 						 $this->cache->flush();
 						 $this->saveMenuLocations($form->getModel(), $request);
 					});
-			 event(new CreatedContentEvent(MENU_MODULE_SCREEN_NAME, $request,  $form));
-			 return $this
+		 	 return $this
 					->httpResponse()
 					->setPreviousRoute('menus.index')
 					->setNextRoute('menus.edit', $form->getModel()->getKey())

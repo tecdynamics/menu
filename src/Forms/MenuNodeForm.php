@@ -2,111 +2,130 @@
 
 namespace Tec\Menu\Forms;
 
+use Tec\Base\Forms\FieldOptions\MediaImageFieldOption;
+use Tec\Base\Forms\FieldOptions\SelectFieldOption;
+use Tec\Base\Forms\FieldOptions\TextFieldOption;
+use Tec\Base\Forms\Fields\MediaImageField;
+use Tec\Base\Forms\Fields\SelectField;
+use Tec\Base\Forms\Fields\TextField;
 use Tec\Base\Forms\FormAbstract;
 use Tec\Menu\Models\MenuNode;
 
 class MenuNodeForm extends FormAbstract
 {
-    public function buildForm(): void
-    {
-        $this->setupModel(new MenuNode());
-
-        $id = $this->model->id ?? 'new';
-
-        $this
-            ->withCustomFields()
-            ->contentOnly()
-            ->add('menu_id', 'hidden', [
-                'attr' => [
-                    'class' => 'menu_id',
-                ],
-                'value' => $this->request->route('menu'),
-            ])
-            ->add('title', 'text', [
-                'label' => trans('packages/menu::menu.title'),
-                'label_attr' => [
-                    'class' => 'control-label',
-                    'data-update' => 'title',
-                    'for' => 'menu-node-title-' . $id,
-                ],
-                'attr' => [
-                    'placeholder' => trans('packages/menu::menu.title_placeholder'),
-                    'data-old' => $this->model->title,
-                    'id' => 'menu-node-title-' . $id,
-                ],
-            ]);
-
-        if (! $this->model->reference_id) {
-            $this
-                ->add('url', 'text', [
-                    'label' => trans('packages/menu::menu.url'),
-                    'label_attr' => [
-                        'class' => 'control-label',
-                        'data-update' => 'custom-url',
-                        'for' => 'menu-node-url-' . $id,
-                    ],
-                    'attr' => [
-                        'placeholder' => trans('packages/menu::menu.url_placeholder'),
-                        'data-old' => $this->model->url,
-                        'id' => 'menu-node-url-' . $id,
-                    ],
-                ]);
-        }
-
-        $this
-            ->add('icon_font', 'text', [
-                'label' => trans('packages/menu::menu.icon'),
-                'label_attr' => [
-                    'class' => 'control-label',
-                    'data-update' => 'icon_font',
-                    'for' => 'menu-node-icon-font-' . $id,
-                ],
-                'attr' => [
-                    'placeholder' => trans('packages/menu::menu.icon_placeholder'),
-                    'data-old' => $this->model->icon_font,
-                    'id' => 'menu-node-icon-font-' . $id,
-                ],
-            ])
-            ->add('icon', 'mediaImage', [
-                'label' => 'Image',
-                'label_attr' => [
-                    'class' => 'control-label',
-                    'data-update' => 'icon',
-                    'for' => 'menu-node-icon-font-' . $id,
-                ],
-                'attr' => [
-                    'data-old' => $this->model->icon,
-                    'id' => 'menu-node-icon-' . $id,
-                ],
-            ])
-            ->add('css_class', 'text', [
-                'label' => trans('packages/menu::menu.css_class'),
-                'label_attr' => [
-                    'class' => 'control-label',
-                    'data-update' => 'css_class',
-                    'for' => 'menu-node-css-class-' . $id,
-                ],
-                'attr' => [
-                    'placeholder' => trans('packages/menu::menu.css_class_placeholder'),
-                    'data-old' => $this->model->css_class,
-                    'id' => 'menu-node-css-class-' . $id,
-                ],
-            ])
-            ->add('target', 'customSelect', [
-                'label' => trans('packages/menu::menu.target'),
-                'label_attr' => [
-                    'class' => 'control-label',
-                    'data-update' => 'target',
-                    'for' => 'menu-node-target-' . $id,
-                ],
-                'choices' => [
-                    '_self' => trans('packages/menu::menu.self_open_link'),
-                    '_blank' => trans('packages/menu::menu.blank_open_link'),
-                ],
-                'attr' => [
-                    'data-old' => $this->model->target,
-                    'id' => 'menu-node-target-' . $id,
-                ],
-            ]);
-    }
+	 public function setup(): void
+	 {
+			$this->model(MenuNode::class);
+			$id = $this->model->id ?? 'new';
+			$this
+				 ->contentOnly()
+				 ->add(
+						'menu_id',
+						'hidden',
+						TextFieldOption::make()
+							 ->value($this->request->route('menu'))
+							 ->attributes(['class' => 'menu_id'])
+							 ->toArray()
+				 )
+				 ->add(
+						'title',
+						TextField::class,
+						TextFieldOption::make()
+							 ->label(trans('packages/menu::menu.title'))
+							 ->labelAttributes([
+																		'data-update' => 'title',
+																		'for' => 'menu-node-title-' . $id,
+																 ])
+							 ->placeholder(trans('packages/menu::menu.title_placeholder'))
+							 ->attributes([
+															 'data-old' => $this->model->title,
+															 'id' => 'menu-node-title-' . $id,
+														])
+							 ->toArray()
+				 );
+			if (! $this->model->reference_id) {
+				 $this
+						->add(
+							 'url',
+							 TextField::class,
+							 TextFieldOption::make()
+									->label(trans('packages/menu::menu.url'))
+									->labelAttributes([
+																			 'data-update' => 'custom-url',
+																			 'for' => 'menu-node-url-' . $id,
+																		])
+									->placeholder(trans('packages/menu::menu.url_placeholder'))
+									->attributes([
+																	'data-old' => $this->model->url,
+																	'id' => 'menu-node-url-' . $id,
+															 ])
+									->toArray()
+						);
+			}
+			$this
+				 ->add(
+						'icon_font',
+						TextField::class,
+						TextFieldOption::make()
+							 ->label(trans('packages/menu::menu.icon'))
+							 ->labelAttributes([
+																		'data-update' => 'icon',
+																		'for' => 'menu-node-icon-font-' . $id,
+																 ])
+							 ->placeholder(trans('packages/menu::menu.icon_placeholder'))
+							 ->attributes([
+															 'data-old' => $this->model->icon_font,
+															 'id' => 'menu-node-icon-font-' . $id,
+														])
+							 ->toArray()
+				 )
+				 ->add('icon', MediaImageField::class,
+						 MediaImageFieldOption::make()
+						->label('Image')
+						 ->labelAttributes([
+							 'class' => 'control-label',
+							 'data-update' => 'icon',
+							 'for' => 'menu-node-icon-font-' . $id,
+						])
+					  ->attributes([
+							 'data-old' => $this->model->icon,
+							 'id' => 'menu-node-icon-' . $id,
+						])->toArray()
+				  )
+				 ->add(
+						'css_class',
+						TextField::class,
+						TextFieldOption::make()
+							 ->label(trans('packages/menu::menu.css_class'))
+							 ->labelAttributes([
+																		'data-update' => 'css_class',
+																		'for' => 'menu-node-css-class-' . $id,
+																 ])
+							 ->placeholder(trans('packages/menu::menu.css_class_placeholder'))
+							 ->attributes([
+															 'data-old' => $this->model->css_class,
+															 'id' => 'menu-node-css-class-' . $id,
+														])
+							 ->toArray()
+				 )
+				 ->add(
+						'target',
+						SelectField::class,
+						SelectFieldOption::make()
+							 ->label(trans('packages/menu::menu.target'))
+							 ->labelAttributes([
+																		'data-update' => 'target',
+																		'for' => 'menu-node-target-' . $id,
+																 ])
+							 ->choices([
+														'_self' => trans('packages/menu::menu.self_open_link'),
+														'_blank' => trans('packages/menu::menu.blank_open_link'),
+												 ])
+							 ->attributes([
+															 'data-old' => $this->model->target,
+															 'id' => 'menu-node-target-' . $id,
+														])
+							 ->toArray()
+				 );
+	 }
 }
