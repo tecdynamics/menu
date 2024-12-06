@@ -2,6 +2,7 @@
 
 return [
     'name' => 'Menus',
+    'description' => 'Manage your system menus',
     'key_name' => 'Menu name (key: :key)',
     'basic_info' => 'Basic information',
     'add_to_menu' => 'Add to menu',
@@ -25,6 +26,6 @@ return [
     'url_placeholder' => 'URL',
     'css_class_placeholder' => 'CSS class',
     'menu_id' => 'Menu ID',
-		'image'=>'Image',
-		'template'=>'Template'
+    'badge_text' => 'Badge text',
+    'badge_color' => 'Badge color',
 ];

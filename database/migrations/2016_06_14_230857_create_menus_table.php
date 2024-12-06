@@ -12,8 +12,6 @@ return new class () extends Migration {
             $table->string('name', 120);
             $table->string('slug', 120)->unique()->nullable();
             $table->string('status', 60)->default('published');
-            $table->string('image', 250)->default(null);
-            $table->string('template', 191)->default('default');
             $table->timestamps();
         });
 
@@ -22,7 +20,7 @@ return new class () extends Migration {
             $table->foreignId('menu_id')->index();
             $table->foreignId('parent_id')->default(0)->index();
             $table->foreignId('reference_id')->nullable();
-            $table->string('reference_type', 255)->nullable();
+            $table->string('reference_type')->nullable();
             $table->string('url', 120)->nullable();
             $table->string('icon_font', 50)->nullable();
             $table->tinyInteger('position')->unsigned()->default(0);
@@ -30,7 +28,6 @@ return new class () extends Migration {
             $table->string('css_class', 120)->nullable();
             $table->string('target', 20)->default('_self');
             $table->tinyInteger('has_child')->unsigned()->default(0);
-            $table->string('icon', 200)->default(null);
             $table->timestamps();
         });
 

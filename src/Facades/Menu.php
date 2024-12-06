@@ -23,6 +23,9 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Tec\Menu\Menu setMenuOptionModels(array $models)
  * @method static \Tec\Menu\Menu clearCacheMenuItems()
  * @method static void useMenuItemIconImage()
+ * @method static void saveMenuNodeImages(array $nodes, \Tec\Menu\Models\MenuNode $model)
+ * @method static void useMenuItemBadge()
+ * @method static void saveMenuNodeBadges(array $nodes, \Tec\Menu\Models\MenuNode $model)
  *
  * @see \Tec\Menu\Menu
  */

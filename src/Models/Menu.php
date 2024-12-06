@@ -6,6 +6,7 @@ use Tec\Base\Casts\SafeContent;
 use Tec\Base\Enums\BaseStatusEnum;
 use Tec\Base\Models\BaseModel;
 use Tec\Base\Models\Concerns\HasSlug;
+use Tec\Support\Services\Cache\Cache;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Menu extends BaseModel
@@ -18,8 +19,6 @@ class Menu extends BaseModel
         'name',
         'slug',
         'status',
-        'image',
-        'template'
     ];
 
     protected $casts = [
@@ -29,13 +28,19 @@ class Menu extends BaseModel
 
     protected static function booted(): void
     {
-        static::deleting(function (self $model) {
+        static::deleted(function (self $model) {
             $model->menuNodes()->delete();
             $model->locations()->delete();
         });
 
-        self::saving(function (self $model) {
-            $model->slug = self::createSlug($model->slug, $model->getKey());
+        static::saving(function (self $model) {
+            if (! $model->slug) {
+                $model->slug = self::createSlug($model->name, $model->getKey());
+            }
+        });
+
+        static::saved(function () {
+            (new Cache(app('cache'), static::class))->flush();
         });
     }
 

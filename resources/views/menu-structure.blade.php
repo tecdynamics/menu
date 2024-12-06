@@ -15,7 +15,6 @@
                 @php
                     do_action(MENU_ACTION_SIDEBAR_OPTIONS);
                 @endphp
-
                 <x-core::card>
                     <x-core::card.header>
                         <a
